@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
+
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
-from scipy.spatial import KDTree
 
+print("passed")
+
+from scipy.spatial import KDTree
+import numpy as np
 import math
 
 '''
@@ -37,10 +40,10 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
-        self.pose = None
-        self.base_waypoints = None
-        self.waypoints_2d = None
-        self.waypoint_tree = None
+        #self.pose = None
+        #self.base_waypoints = None
+        #self.waypoints_2d = None
+        #self.waypoint_tree = None
 
         self.loop()
         #rospy.spin()
@@ -54,7 +57,7 @@ class WaypointUpdater(object):
                 self.publish_waypoints(closest_waypoint_idx)
             rate.sleep()
 
-    def get_closest_waypoint_id(self):
+    def get_closest_waypoint_idx(self):
         x = self.pose.pose.position.x
         y = self.pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x,y], 1)[1]
