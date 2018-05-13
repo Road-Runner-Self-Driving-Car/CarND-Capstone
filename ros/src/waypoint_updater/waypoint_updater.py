@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from geometry_msgs.msg import TwistStamped
 
 print("passed")
 
@@ -131,13 +132,12 @@ class WaypointUpdater(object):
             print "Traffic Light Detector Initialized ..."
 
            
-
     def waypoints_cb(self, waypoints):
         # TODO: Implement
 
-       MPS = 0.44704
+        MPS = 0.44704
 
-#prev:
+        #prev:
         self.base_waypoints = waypoints
         #if not self.waypoints_2d:
         #    self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
@@ -229,7 +229,7 @@ class WaypointUpdater(object):
 
             # 8 seconds away
             wpx1.append(max([self.restricted_speed_in_mps * 8, 85]))
-	        wpy1.append(self.restricted_speed_mps)
+            wpy1.append(self.restricted_speed_mps)
 
             wpx1.append(LOOKAHEAD_WPS)
             wpy1.append(self.restricted_speed_mps)
