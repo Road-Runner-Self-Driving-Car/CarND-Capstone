@@ -63,7 +63,7 @@ class TLDetector(object):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
-        print("waypoints_cb")
+        #print("waypoints_cb")
         self.waypoints = waypoints
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.waypoints.waypoints]
@@ -81,7 +81,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        print("image_cb was called")
+        #print("image_cb was called")
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -109,7 +109,7 @@ class TLDetector(object):
         self.state_count += 1
 
     def get_closest_waypoint(self, pose):
-        print("get_closest_waypoint")
+        #print("get_closest_waypoint")
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -127,7 +127,7 @@ class TLDetector(object):
         #pass
 
     def get_light_state(self, light):
-        print("get_light_sate")
+        #print("get_light_sate")
         """Determines the current color of the traffic light
 
         Args:
@@ -159,7 +159,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        print("inside process_traffic_lights")
+        #print("inside process_traffic_lights")
         closest_light = None
         line_wp_idx = None
 
