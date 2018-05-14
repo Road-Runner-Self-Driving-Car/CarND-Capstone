@@ -18,6 +18,7 @@ class TLDetector(object):
     def __init__(self):
         rospy.init_node('tl_detector')
         print("TLDetector initialized")
+        print("Please turn on camera in the simulator")
 
         self.pose = None
         self.waypoints = None #Waypoint()
@@ -106,7 +107,7 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-        self.state_count += 1
+            self.state_count += 1 ########### different than walkthrough
 
     def get_closest_waypoint(self, pose):
         #print("get_closest_waypoint")
@@ -123,6 +124,7 @@ class TLDetector(object):
         x = self.pose.pose.position.x
         y = self.pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+        #print("closest_idx: ", closest_idx)
         return closest_idx
         #pass
 
@@ -168,29 +170,30 @@ class TLDetector(object):
         if(self.pose):
             car_wp_idx = self.get_closest_waypoint([self.pose.pose.position.x, self.pose.pose.position.y])
 
-        #TODO find the closest visible traffic light (if one exists)
-        diff = len(self.waypoints.waypoints)
-        for i, light in enumerate(self.lights):
-            # Get stop line waypoint index
-            line = stop_line_positions[i]
-            temp_wp_idx = self.get_closest_waypoint([line[0], line[1]])
-            # Find closest stop line waypoint index
-            d = temp_wp_idx - car_wp_idx
-            if d >= 0 and d < diff:
-                diff = d
-                closest_light = light
-                light_wp_idx = temp_wp_idx
+            #TODO find the closest visible traffic light (if one exists)
+            diff = len(self.waypoints.waypoints)
+            for i, light in enumerate(self.lights):
+                # Get stop line waypoint index
+                line = stop_line_positions[i]
+                temp_wp_idx = self.get_closest_waypoint([line[0], line[1]])
+                print("i, stop_line_position, the index: ",i,line,temp_wp_idx)
+                # Find closest stop line waypoint index
+                d = temp_wp_idx - car_wp_idx
+                if d >= 0 and d < diff:
+                    diff = d
+                    closest_light = light
+                    line_wp_idx = temp_wp_idx
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            print("light_wp_idx, state: ", light_wp_idx, state)
-            return light_wp_idx, state
+            print("line_wp_idx, state: ", line_wp_idx, state)
+            return line_wp_idx, state
 
         #self.waypoints = None
-        light_wp_idx = -1
+        line_wp_idx = -1
         state = TrafficLight.UNKNOWN
-        print("light_wp_idx, state: ", light_wp_idx, state)
-        return light_wp_idx, state
+        print("line_wp_idx, state: ", line_wp_idx, state)
+        return line_wp_idx, state
 
 if __name__ == '__main__':
     try:
