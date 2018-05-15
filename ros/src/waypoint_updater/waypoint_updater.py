@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from std_msgs.msg import Int32, Float32
 from geometry_msgs.msg import TwistStamped
 
 print("passed")
@@ -257,6 +258,9 @@ class WaypointUpdater(object):
         self.redtlwp = msg.data
         if self.state == ST_INITIAL and self.i > 200:
             self.state = ST_GO # no longer in startup state       
+
+    def velocity_cb(self, msg):
+        self.current_vel = msg.twist.linear.x
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
