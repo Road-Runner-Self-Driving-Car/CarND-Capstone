@@ -158,14 +158,15 @@ class TLDetector(object):
         return light.state
 
         # Use below code for real simulation
-        #if(not self.has_image):
-        #    self.prev_light_loc = None
-        #    return False
+        """
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return False
 
-        #cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-
-        #Get classification
-        #return self.light_classifier.get_classification(cv_image)
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+        return self.light_classifier.get_classification(cv_image)
+        """
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -191,7 +192,7 @@ class TLDetector(object):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint([line[0], line[1]])
-                print("i, stop_line_position, the index: ",i,line,temp_wp_idx)
+                #print("i, stop_line_position, the index: ",i,line,temp_wp_idx)
                 # Find closest stop line waypoint index
                 d = temp_wp_idx - car_wp_idx
                 if d >= 0 and d < diff:
@@ -199,15 +200,16 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
+        light_dict={0:'RED', 1:'YELLOW', 2:'GREEN', 4:'UNKNOWN'}
         if closest_light:
             state = self.get_light_state(closest_light)
-            print("line_wp_idx, state: ", line_wp_idx, state)
+            print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
             return line_wp_idx, state
 
         #self.waypoints = None
         line_wp_idx = -1
         state = TrafficLight.UNKNOWN
-        print("line_wp_idx, state: ", line_wp_idx, state)
+        print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
         return line_wp_idx, state
 
 if __name__ == '__main__':
