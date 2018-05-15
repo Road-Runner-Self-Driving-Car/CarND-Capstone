@@ -27,8 +27,6 @@ class TLDetector(object):
         self.lights = []
         self.waypoints_2d = None
 
-        #sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        #sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
@@ -39,8 +37,7 @@ class TLDetector(object):
         simulator. When testing on the vehicle, the color state will not be available. You'll need to
         rely on the position of the light and the camera image to predict it.
         '''
-        #sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        #sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
+
         rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
         rospy.Subscriber('/image_color', Image, self.image_cb)
 
@@ -50,7 +47,7 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+        self.light_classifier = TLClassifier(model_path='light_classification/frozen_inference_graph.pb')
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -61,18 +58,15 @@ class TLDetector(object):
         rospy.spin()
 
     def pose_cb(self, msg):
-        #print("pose_cb")
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
-        #print("waypoints_cb")
         self.waypoints = waypoints
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in self.waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
-        #print("traffic_cb")
         self.lights = msg.lights
 
     def image_cb(self, msg):
@@ -83,7 +77,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        #print("image_cb was called")
+
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -112,7 +106,7 @@ class TLDetector(object):
 
 
     def get_closest_waypoint(self, pos):
-        #print("get_closest_waypoint")
+
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -144,7 +138,7 @@ class TLDetector(object):
 
 
     def get_light_state(self, light):
-        #print("get_light_sate")
+
         """Determines the current color of the traffic light
 
         Args:
@@ -177,7 +171,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #print("inside process_traffic_lights")
+
         closest_light = None
         line_wp_idx = None
 
@@ -192,7 +186,7 @@ class TLDetector(object):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint([line[0], line[1]])
-                #print("i, stop_line_position, the index: ",i,line,temp_wp_idx)
+
                 # Find closest stop line waypoint index
                 d = temp_wp_idx - car_wp_idx
                 if d >= 0 and d < diff:
