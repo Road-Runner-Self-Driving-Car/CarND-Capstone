@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from styx_msgs.msg import TrafficLightArray, TrafficLight
 
 print("passed")
 
@@ -34,7 +35,7 @@ class WaypointUpdater(object):
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
-
+        rospy.Subscriber('/TrafficLight', TrafficLight, self.traffic_cb)
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
@@ -43,6 +44,7 @@ class WaypointUpdater(object):
         self.pose = None
         self.base_waypoints = None
         self.waypoints_2d = None
+        self.tl_state = None
         #self.waypoint_tree = Waypoint()
 
         self.loop()
@@ -97,7 +99,16 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        pass
+        if msg.state == TrafficLight.RED:
+            self.tl_state = 0
+            print('Red')
+        elif msg.state == TrafficLight.YELLOW:
+            self.tl_state = 1
+            print('Yellow')           
+        elif msg.state == TrafficLight.GREEN:
+            self.tl_state = 1
+            print('Yellow')
+
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
