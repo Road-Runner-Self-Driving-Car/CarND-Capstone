@@ -194,16 +194,14 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        light_dict={0:'RED', 1:'YELLOW', 2:'GREEN', 4:'UNKNOWN'}
         if closest_light:
             state = self.get_light_state(closest_light)
-            print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
+            #print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
             return line_wp_idx, state
 
-        #self.waypoints = None
         line_wp_idx = -1
         state = TrafficLight.UNKNOWN
-        print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
+        #print("line_wp_idx, state: ", line_wp_idx, light_dict[state])
         return line_wp_idx, state
 
 if __name__ == '__main__':
