@@ -13,6 +13,7 @@ class TLClassifier(object):
         self.DETECTION_CONFIDENCE = 0.6
         self.TL_index = {1:TrafficLight.GREEN, 2:TrafficLight.RED, 3:TrafficLight.YELLOW, 4:TrafficLight.UNKNOWN}
 
+ 
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -32,7 +33,11 @@ class TLClassifier(object):
                         tensor_name)
            
             self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
-    
+
+            config=tf.ConfigProto()
+            config.gpu_options.allow_growth=True
+            self.sess = tf.Session(config=config)
+
 
     def get_classification(self, cv_image):
         """Determines the color of the traffic light in the image
@@ -48,28 +53,28 @@ class TLClassifier(object):
         
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(cv_image, axis=0)
-      
-        with tf.Session(graph=self.detection_graph) as sess:
-            output_dict = sess.run(self.tensor_dict,
-                             feed_dict={self.image_tensor: image_np_expanded})
-            # all outputs are float32 numpy arrays, so convert types as appropriate
-            num_detections = int(output_dict['num_detections'][0])
-            detection_classes = output_dict['detection_classes'][0].astype(np.uint8)
-            detection_scores = output_dict['detection_scores'][0]
+    
+        output_dict = self.sess.run(self.tensor_dict,
+                            feed_dict={self.image_tensor: image_np_expanded})  
 
-            if detection_scores[0] > self.DETECTION_CONFIDENCE: 
-                detection_class = detection_classes[0]
-                for index in range(num_detections-1):
-                    if detection_scores[index] > self.DETECTION_CONFIDENCE:
-                        if not detection_classes[index] == detection_class:
-                            detection_class = 4 #Unknown
-                            break
-                    else:
-                        break        
-            else:
-                detection_class = 4 #Unknown
-            
-            return self.TL_index[detection_class]
+        # all outputs are float32 numpy arrays, so convert types as appropriate
+        num_detections = int(output_dict['num_detections'][0])
+        detection_classes = output_dict['detection_classes'][0].astype(np.uint8)
+        detection_scores = output_dict['detection_scores'][0]
+
+        if detection_scores[0] > self.DETECTION_CONFIDENCE: 
+            detection_class = detection_classes[0]
+            for index in range(num_detections-1):
+                if detection_scores[index] > self.DETECTION_CONFIDENCE:
+                    if not detection_classes[index] == detection_class:
+                        detection_class = 4 #Unknown
+                        break
+                else:
+                    break        
+        else:
+            detection_class = 4 #Unknown
+        
+        return self.TL_index[detection_class]
       
 
 if __name__ == '__main__':
@@ -78,6 +83,7 @@ if __name__ == '__main__':
         from cv_bridge import CvBridge
 
         tl_state=TLClassifier(model_path='frozen_inference_graph.pb')
+        #tl_state=TLClassifier(model_path='eightbit_graph.pb')
         image = Image.open('sample_images/left0000.jpg')
         
         (im_width, im_height) = image.size
