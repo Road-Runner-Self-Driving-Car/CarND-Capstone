@@ -122,7 +122,7 @@ class WaypointUpdater(object):
             lane.waypoints = base_wpoints
         else:
             self.braking = True
-            lane.waypoints = self.deceleration_waypoints(base_wpoints, closest_idx)
+            lane.waypoints = self.deceleration_waypoints(self.base_waypoints.waypoints, closest_idx)
 
         return lane
         # publish        
@@ -139,7 +139,7 @@ class WaypointUpdater(object):
             pnt.pose = wp.pose
 
             # Stop 2 or 3 waypoints back so nose of car stops on line
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)  # start with 2
+            stop_idx = max(self.stopline_wp_idx - closest_idx - STOP_DISTANCE, 0)  # start with 2
             dist = self.distance(waypoints, i, stop_idx)
 
             velocity = math.sqrt(2 * MAX_DECELERATION * dist)  # note that linear may be better than sqrt
