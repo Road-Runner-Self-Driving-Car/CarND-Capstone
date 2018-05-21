@@ -123,7 +123,7 @@ class WaypointUpdater(object):
             self.braking = True
             # tl_dist = self.distance(self.base_waypoints.waypoints, closest_idx, traffic_wp)
             # min_stopping_dist = self.current_velocity ** 2 / (2.0 * MAX_DECELERATION) + STOP_DISTANCE
-            lane.waypoints = self.deceleration_waypoints(base_wpoints, closest_idx)
+            lane.waypoints = self.deceleration_waypoints(self.base_waypoints, closest_idx)
 
         return lane
         # publish        
