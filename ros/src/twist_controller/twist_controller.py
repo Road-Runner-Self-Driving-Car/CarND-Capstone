@@ -15,7 +15,7 @@ class Controller(object):
         self.last_throttle = 0.0
 
         kp = 0.3
-        ki = 0.001
+        ki = 0.005
         kd = 0.5
         mn = decel_limit
         mx = accel_limit
@@ -82,7 +82,7 @@ class Controller(object):
             # brake = self.brake_lpf.filt(brake)
             throttle = 0
         else:
-            brake = 10
+            brake = 30
             throttle = 0
 
         self.last_throttle = throttle
