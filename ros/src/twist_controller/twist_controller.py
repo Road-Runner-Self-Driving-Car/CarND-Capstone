@@ -21,7 +21,7 @@ class Controller(object):
         mx = accel_limit
 
         self.throttle_controller = PID(kp, ki, kd)
-        self.yaw_controller = YawController(wheel_base, steer_ratio, 0.0, max_lat_accel, max_steer_angle)
+        self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
         tau = 0.5
         ts = 0.02
 
