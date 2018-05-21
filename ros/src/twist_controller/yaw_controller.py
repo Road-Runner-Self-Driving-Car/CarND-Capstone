@@ -13,7 +13,7 @@ class YawController(object):
         self.min_angle = -max_steer_angle
         self.max_angle = max_steer_angle
         self.linear_pid = PID(0.9, 0.001, 0.0004, self.min_angle, self.max_angle)
-        self.cte_pid = PID(0.8, 0, 0.22, self.min_angle, self.max_angle)
+        self.cte_pid = PID(0.85, 0, 0.22, self.min_angle, self.max_angle)
         self.tau = 0.2
         self.ts = 0.1
         self.lpf = LowPassFilter(self.tau, self.ts)
