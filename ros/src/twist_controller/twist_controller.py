@@ -16,7 +16,7 @@ class Controller(object):
 
         kp = 0.3
         ki = 0.001
-        kd = 0.1
+        kd = 1
         mn = decel_limit
         mx = accel_limit
 
