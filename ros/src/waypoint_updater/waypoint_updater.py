@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import rospy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from styx_msgs.msg import Lane, Waypoint
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Float32
+import tf
 
 import numpy as np
 from scipy.spatial import KDTree
@@ -24,39 +25,41 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-MAX_DECELERATION = 0.5
+LOOKAHEAD_WPS = 200  # Number of waypoints we will publish. You can change this number
+MAX_DECELERATION = 4.0
+STOP_DISTANCE = 5.0
+
 
 class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
+        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+        rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
+        rospy.Subscriber('/obstacle_waypoint', Int32, self.obstacle_waypoint_cb)
+        rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
+
+        self.current_velocity = 0.0
+        self.decel = 1.0
 
         self.base_waypoints = None
-        self.pose = None        
+        self.pose = None
         self.stopline_wp_idx = -1
         self.kdtree_waypoints = None
-
-        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-
         self.waypoints_2d = None
-        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
-
+        self.braking = False
         # DONE: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
 
-        rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
-
-        self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size = 1)
+        self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         self.loop()
 
-
     def loop(self):
-        rate = rospy.Rate(50)   # update rate / sec
+        rate = rospy.Rate(50)  # update rate / sec
         while not rospy.is_shutdown():
-            if self.pose and self.base_waypoints:        
+            if self.pose and self.base_waypoints:
                 self.publish_waypoints()
             rate.sleep()
-
 
     def get_closest_waypoint_idx(self):
         x = self.pose.pose.position.x
@@ -80,70 +83,90 @@ class WaypointUpdater(object):
 
         return closest_idx
 
-
     def publish_waypoints(self):
         final_lane = self.generate_lane()
         self.final_waypoints_pub.publish(final_lane)
-        
 
     def generate_lane(self):
         # Build final lane
         lane = Lane()
+        pose = self.pose
 
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
-        base_wpoints = self.base_waypoints.waypoints[closest_idx : farthest_idx]
+        base_wpoints = self.base_waypoints.waypoints[closest_idx: farthest_idx]
+        wp_x = base_wpoints[0].pose.pose.position.x
+        wp_y = base_wpoints[0].pose.pose.position.y
+        heading = math.atan2((wp_y - pose.pose.position.y), (wp_x - pose.pose.position.x))
 
-        if (self.stopline_wp_idx == -1) or (self.stopline_wp_idx >= farthest_idx):
+        x = pose.pose.orientation.x
+        y = pose.pose.orientation.y
+        z = pose.pose.orientation.z
+        w = pose.pose.orientation.w
+
+        euler_angles_xyz = tf.transformations.euler_from_quaternion([x, y, z, w])
+        theta = euler_angles_xyz[-1]
+        angle = math.fabs(theta - heading)
+
+        if angle > math.pi / 4.0:
+            closest_idx += 1
+
+        traffic_wp = self.stopline_wp_idx
+
+        tl_dist = self.distance(self.base_waypoints.waypoints, closest_idx, traffic_wp)
+
+        min_stopping_dist = self.current_velocity ** 2 / (2.0 * MAX_DECELERATION) + STOP_DISTANCE
+
+
+        if traffic_wp == -1 or (traffic_wp > farthest_idx and tl_dist > min_stopping_dist):
+            self.braking = False
             lane.waypoints = base_wpoints
         else:
+            self.braking = True
             lane.waypoints = self.deceleration_waypoints(base_wpoints, closest_idx)
 
         return lane
         # publish        
-        #self.final_waypoints_pub.publish(lane)   
+        # self.final_waypoints_pub.publish(lane)
 
+    def current_velocity_cb(self, msg):
+        self.current_velocity = msg.twist.linear.x
 
-    def deceleration_waypoints(self, waypoints, closest_idx):   
+    def deceleration_waypoints(self, waypoints, closest_idx):
         new_points = []
         for i, wp in enumerate(waypoints):
-            
+
             pnt = Waypoint()
             pnt.pose = wp.pose
 
             # Stop 2 or 3 waypoints back so nose of car stops on line
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) # start with 2
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)  # start with 2
             dist = self.distance(waypoints, i, stop_idx)
-            
-            velocity = math.sqrt( 2 * MAX_DECELERATION * dist)   # note that linear may be better than sqrt
+
+            velocity = math.sqrt(2 * MAX_DECELERATION * dist)  # note that linear may be better than sqrt
             if velocity < 1.0:
                 velocity = 0.0
             pnt.twist.twist.linear.x = min(velocity, wp.twist.twist.linear.x)
             new_points.append(pnt)
-        
-        return new_points
 
+        return new_points
 
     def pose_cb(self, msg):
         # DONE: Implement
- 
-        # TODO: can do more here 
-        self.pose = msg  
-        
-        #self.i += 1
-        #self.pose = msg.pose
-        #self.position = self.pose.position
-        #self.orientation = self.pose.orientation
-        #euler = tf.transformations.euler_from_quaternion([
+        self.pose = msg
+
+        # self.i += 1
+        # self.pose = msg.pose
+        # self.position = self.pose.position
+        # self.orientation = self.pose.orientation
+        # euler = tf.transformations.euler_from_quaternion([
         #    self.orientation.x,
         #    self.orientation.y,
         #    self.orientation.z,
         #    self.orientation.w])
-        #self.theta = euler[2]
-        #if self.state == ST_INITIAL:
+        # self.theta = euler[2]
+        # if self.state == ST_INITIAL:
         #    print "Traffic Light Detector Initialized ..."
-
-
 
     def waypoints_cb(self, waypoints):
         # DONE: Implement        
@@ -153,12 +176,10 @@ class WaypointUpdater(object):
             # convert the data structure to KDTree So that it is fast to calculate closest waypoint
             self.waypoints_2d = [[wpt.pose.pose.position.x, wpt.pose.pose.position.y] for wpt in waypoints.waypoints]
             self.kdtree_waypoints = KDTree(self.waypoints_2d)
-        
 
     def traffic_cb(self, msg):
         # DONE: Callback for /traffic_waypoint message. Implement
         self.stopline_wp_idx = msg.data
-    
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
@@ -172,8 +193,8 @@ class WaypointUpdater(object):
 
     def distance(self, waypoints, wp1, wp2):
         dist = 0
-        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
-        for i in range(wp1, wp2+1):
+        dl = lambda a, b: math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
+        for i in range(wp1, wp2 + 1):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist

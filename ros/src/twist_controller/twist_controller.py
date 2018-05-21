@@ -13,7 +13,7 @@ class Controller(object):
                  steer_ratio, max_lat_accel, max_steer_angle):
         # TODO: Implement
         self.last_throttle = 0.0
-        
+
         kp = 5.0
         ki = 0.05
         kd = 0
