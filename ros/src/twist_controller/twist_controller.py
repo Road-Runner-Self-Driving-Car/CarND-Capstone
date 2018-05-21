@@ -79,7 +79,7 @@ class Controller(object):
             decel = max(vel_error, self.decel_limit)
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius
             brake = brake * math.tanh(-throttle * 0.3)
-            brake = self.brake_lpf.filt(brake)
+            # brake = self.brake_lpf.filt(brake)
             throttle = 0
         else:
             brake = 400
