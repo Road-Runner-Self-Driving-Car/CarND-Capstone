@@ -78,7 +78,7 @@ class Controller(object):
             brake = 0
             throttle = 0
 
-        brake = self.brake_lpf.filter(brake)
+        brake = self.brake_lpf.filt(brake)
         if brake < 100:
             brake = 0.0
         # decel = max(vel_error, self.decel_limit)
