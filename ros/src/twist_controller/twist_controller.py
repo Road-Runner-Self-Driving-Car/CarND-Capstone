@@ -15,7 +15,7 @@ class Controller(object):
         self.last_throttle = 0.0
 
         kp = 0.3
-        ki = 0.005
+        ki = 0.0025
         kd = 0.5
         mn = decel_limit
         mx = accel_limit
