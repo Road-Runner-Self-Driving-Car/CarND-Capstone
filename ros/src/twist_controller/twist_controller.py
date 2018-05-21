@@ -70,7 +70,7 @@ class Controller(object):
         # Here to set the velocity threshold so that, as the speed is too low, just stop
         # In order to avoid the jerk
 
-        if throttle > 0:
+        if throttle > 0 and vel_error > 0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
@@ -79,7 +79,7 @@ class Controller(object):
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
-            brake = 700
+            brake = 400
             throttle = 0
         self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
@@ -95,5 +95,5 @@ class Controller(object):
         steering = self.yaw_controller.get_steering(linear_vel, angular_vel,
                                                     current_vel)  # if vel_error == 0 and throttle == 0:
         # 	brake = 0.0
-
+        print(linear_vel)
         return throttle, brake, steering
