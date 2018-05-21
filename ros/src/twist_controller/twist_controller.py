@@ -71,7 +71,7 @@ class Controller(object):
         # Here to set the velocity threshold so that, as the speed is too low, just stop
         # In order to avoid the jerk
 
-        if throttle >= 0.1:
+        if throttle > 0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
@@ -85,7 +85,7 @@ class Controller(object):
         self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
         if brake < 700:
-            if throttle == 0 or current_vel < 0.1:
+            if throttle == 0 and current_vel < 1:
                 brake = 700
             else:
                 brake = 0
