@@ -23,7 +23,7 @@ class Controller(object):
         tau = 0.2
         ts = 0.1
         self.vel_lpf = LowPassFilter(tau, ts)
-
+        self.brake_lpf = LowPassFilter(0.5, 0.02)
         self.vehicle_mass = vehicle_mass
         self.fuel_capacity = fuel_capacity
         self.brake_deadband = brake_deadband
@@ -63,20 +63,24 @@ class Controller(object):
 
         # Here to set the velocity threshold so that, as the speed is too low, just stop
         # In order to avoid the jerk
-        if throttle < -self.brake_deadband:
-            brake = self.max_brake_const * math.tanh(-throttle * 0.3)
-            throttle = 0
-        elif throttle < self.brake_deadband:
-            brake = 0
-            throttle = 0
-        else:
+
+        if throttle >= 0.0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
             if throttle > self.accel_limit:
                 throttle = self.accel_limit
             if throttle < self.decel_limit:
                 throttle = self.decel_limit
             brake = 0
+        elif throttle < -1.1:
+            brake = self.max_brake_const * math.tanh(-throttle * 0.3)
+            throttle = 0
+        else:
+            brake = 0
+            throttle = 0
 
+        brake = self.brake_lpf.filter(brake)
+        if brake < 100:
+            brake = 0.0
         # decel = max(vel_error, self.decel_limit)
         # brake = decel * self.vehicle_mass * self.wheel_radius if decel > 0 else 0
 
