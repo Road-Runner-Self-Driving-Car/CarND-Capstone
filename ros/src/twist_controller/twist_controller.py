@@ -70,20 +70,22 @@ class Controller(object):
         # Here to set the velocity threshold so that, as the speed is too low, just stop
         # In order to avoid the jerk
 
-        if throttle > 0 and vel_error > 0:
+        if throttle > 0.15 and vel_error > 0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
             brake = 0
-        elif throttle < -0.5 and vel_error < 0:
-            brake = self.max_brake_const * math.tanh(-throttle * 0.3)
+        elif throttle < 0.1 and vel_error < 0:
+            decel = max(vel_error, self.decel_limit)
+            brake = abs(decel) * self.vehicle_mass * self.wheel_radius
+            # brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
             brake = 400
             throttle = 0
 
         self.last_throttle = throttle
-        # brake = self.brake_lpf.filt(brake)
+        brake = self.brake_lpf.filt(brake)
 
         if linear_vel == 0 and current_vel < 1:
             brake = 400
