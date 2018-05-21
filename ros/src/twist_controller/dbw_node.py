@@ -66,6 +66,7 @@ class DBWNode(object):
         self.linear_vel = None
         self.anuglar_vel = None
         self.throttle = self.steering = self.brake = 0
+        self.cur_anuglar = None
 
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
@@ -87,7 +88,7 @@ class DBWNode(object):
             #   self.publish(throttle, brake, steer)
             if not None in (self.current_vel, self.linear_vel, self.anuglar_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel, self.dbw_enabled,
-                                                                                   self.linear_vel, self.anuglar_vel)
+                                                                                   self.linear_vel, self.anuglar_vel, self.cur_anuglar)
             if self.dbw_enabled:
                 self.publish(self.throttle, self.brake, self.steering)
             rate.sleep()
@@ -101,6 +102,7 @@ class DBWNode(object):
 
     def velocity_cb(self, msg):
         self.current_vel = msg.twist.linear.x
+        self.cur_anuglar = msg.twist.angular.z
 
     def publish(self, throttle, brake, steer):
         tcmd = ThrottleCmd()

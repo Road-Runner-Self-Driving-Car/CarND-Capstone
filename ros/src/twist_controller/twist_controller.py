@@ -39,7 +39,7 @@ class Controller(object):
         self.last_time = None
         self.applied_brake = 0
 
-    def control(self, current_vel, dbw_enabled, linear_vel, angular_vel):
+    def control(self, current_vel, dbw_enabled, linear_vel, angular_vel, cur_angular):
         # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
         throttle = 0.0
@@ -82,7 +82,7 @@ class Controller(object):
             # brake = self.brake_lpf.filt(brake)
             throttle = 0
         else:
-            brake = 30
+            brake = 20
             throttle = 0
 
         self.last_throttle = throttle
@@ -98,6 +98,6 @@ class Controller(object):
         # brake = decel * self.vehicle_mass * self.wheel_radius if decel > 0 else 0
 
         steering = self.yaw_controller.get_steering(linear_vel, angular_vel,
-                                                    current_vel)  # if vel_error == 0 and throttle == 0:
+                                                    current_vel, cur_angular, sample_time)  # if vel_error == 0 and throttle == 0:
         # 	brake = 0.0
         return throttle, brake, steering
