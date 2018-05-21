@@ -14,7 +14,7 @@ class Controller(object):
         # TODO: Implement
         self.last_throttle = 0.0
 
-        kp = 5.0
+        kp = 0.3
         ki = 0.05
         kd = 0
         mn = decel_limit
@@ -22,11 +22,11 @@ class Controller(object):
 
         self.throttle_controller = PID(kp, ki, kd)
         self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
-        tau = 0.2
-        ts = 0.1
+        tau = 0.5
+        ts = 0.02
 
         self.vel_lpf = LowPassFilter(tau, ts)
-        self.brake_lpf = LowPassFilter(0.5, 0.02)
+        self.brake_lpf = LowPassFilter(tau, ts)
         self.vehicle_mass = vehicle_mass
         self.fuel_capacity = fuel_capacity
         self.brake_deadband = brake_deadband
@@ -55,14 +55,13 @@ class Controller(object):
             self.last_time = rospy.get_time()
             return throttle, brake, steering
 
-        if abs(linear_vel) < 0.5:
-            linear_vel = 0.0
             # self.throttle_controller.reset()
 
         current_time = rospy.get_time()
         sample_time = current_time - self.last_time
         self.last_time = current_time
 
+        current_vel = self.vel_lpf.filt(current_vel)
         vel_error = linear_vel - current_vel
         self.last_vel = current_vel
         throttle = self.throttle_controller.step(vel_error, sample_time)
@@ -76,7 +75,7 @@ class Controller(object):
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
             brake = 0
-        elif throttle < -1.1:
+        elif throttle < -1.1 and vel_error < 0:
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
@@ -84,11 +83,12 @@ class Controller(object):
             throttle = 0
         self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
-        if brake < 700:
-            if throttle == 0 and current_vel < 1:
-                brake = 700
-            else:
-                brake = 0
+
+        if linear_vel == 0 and current_vel < 1:
+            brake = 400
+
+        if vel_error == 0 and throttle == 0:
+            brake = 0.0
         # decel = max(vel_error, self.decel_limit)
         # brake = decel * self.vehicle_mass * self.wheel_radius if decel > 0 else 0
 
