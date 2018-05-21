@@ -85,7 +85,7 @@ class Controller(object):
         self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
         if brake < 700:
-            if throttle == 0 or current_vel < 1:
+            if throttle == 0 or current_vel < 0.1:
                 brake = 700
             else:
                 brake = 0
