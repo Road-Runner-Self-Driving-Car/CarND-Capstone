@@ -15,8 +15,8 @@ class Controller(object):
         self.last_throttle = 0.0
 
         kp = 0.3
-        ki = 0.05
-        kd = 0
+        ki = 0.001
+        kd = 0.1
         mn = decel_limit
         mx = accel_limit
 
@@ -75,14 +75,14 @@ class Controller(object):
             # if throttle - self.last_throttle > 0.005:
             #     throttle = self.last_throttle + 0.005
             brake = 0
-        elif throttle < -0.1 and vel_error < 0:
+        elif throttle < 0 and vel_error < 0:
             decel = max(throttle, self.decel_limit)
-            brake = abs(decel) * self.vehicle_mass * self.wheel_radius * 0.8
+            brake = abs(decel) * self.vehicle_mass * self.wheel_radius * 0.7
             # brake = brake * math.tanh(-throttle * 0.3)
             # brake = self.brake_lpf.filt(brake)
             throttle = 0
         else:
-            brake = 70
+            brake = 10
             throttle = 0
 
         self.last_throttle = throttle
