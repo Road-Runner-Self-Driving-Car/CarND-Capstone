@@ -46,7 +46,7 @@ class Controller(object):
         if not dbw_enabled:
             self.throttle_controller.reset()
             self.last_time = rospy.get_time()
-        return 0., 0., 0.
+            return 0., 0., 0.
 
         if self.last_time is None:
             self.last_time = rospy.get_time()
