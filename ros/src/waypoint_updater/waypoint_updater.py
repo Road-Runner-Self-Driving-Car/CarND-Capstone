@@ -26,7 +26,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200  # Number of waypoints we will publish. You can change this number
-MAX_DECELERATION = 4.0
+MAX_DECELERATION = 0.5
 STOP_DISTANCE = 5.0
 
 
@@ -94,35 +94,36 @@ class WaypointUpdater(object):
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_wpoints = self.base_waypoints.waypoints[closest_idx: farthest_idx]
-        wp_x = base_wpoints[0].pose.pose.position.x
-        wp_y = base_wpoints[0].pose.pose.position.y
-        heading = math.atan2((wp_y - pose.pose.position.y), (wp_x - pose.pose.position.x))
 
-        x = pose.pose.orientation.x
-        y = pose.pose.orientation.y
-        z = pose.pose.orientation.z
-        w = pose.pose.orientation.w
+        # wp_x = base_wpoints[0].pose.pose.position.x
+        # wp_y = base_wpoints[0].pose.pose.position.y
+        # heading = math.atan2((wp_y - pose.pose.position.y), (wp_x - pose.pose.position.x))
+        #
+        # x = pose.pose.orientation.x
+        # y = pose.pose.orientation.y
+        # z = pose.pose.orientation.z
+        # w = pose.pose.orientation.w
+        #
+        # euler_angles_xyz = tf.transformations.euler_from_quaternion([x, y, z, w])
+        # theta = euler_angles_xyz[-1]
+        # angle = math.fabs(theta - heading)
 
-        euler_angles_xyz = tf.transformations.euler_from_quaternion([x, y, z, w])
-        theta = euler_angles_xyz[-1]
-        angle = math.fabs(theta - heading)
-
-        if angle > math.pi / 4.0:
-            closest_idx += 1
+        # if angle > math.pi / 4.0:
+        #     closest_idx += 1
 
         traffic_wp = self.stopline_wp_idx
 
-        tl_dist = self.distance(self.base_waypoints.waypoints, closest_idx, traffic_wp)
-
-        min_stopping_dist = self.current_velocity ** 2 / (2.0 * MAX_DECELERATION) + STOP_DISTANCE
 
 
-        if traffic_wp == -1 or (traffic_wp > farthest_idx and tl_dist > min_stopping_dist):
+
+        if traffic_wp == -1 or (traffic_wp > farthest_idx):
             self.braking = False
             lane.waypoints = base_wpoints
         else:
             self.braking = True
-            lane.waypoints = self.deceleration_waypoints(self.base_waypoints.waypoints, closest_idx)
+            # tl_dist = self.distance(self.base_waypoints.waypoints, closest_idx, traffic_wp)
+            # min_stopping_dist = self.current_velocity ** 2 / (2.0 * MAX_DECELERATION) + STOP_DISTANCE
+            lane.waypoints = self.deceleration_waypoints(base_wpoints, closest_idx)
 
         return lane
         # publish        
