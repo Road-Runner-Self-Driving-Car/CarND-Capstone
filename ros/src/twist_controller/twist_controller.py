@@ -52,7 +52,6 @@ class Controller(object):
             return throttle, brake, steering
 
         if self.last_time is None:
-            self.throttle_controller.reset()
             self.last_time = rospy.get_time()
             return throttle, brake, steering
 
@@ -80,7 +79,7 @@ class Controller(object):
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
-            brake = 0
+            brake = 400
             throttle = 0
 
         self.last_throttle = throttle
