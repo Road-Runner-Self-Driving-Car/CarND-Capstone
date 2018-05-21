@@ -71,9 +71,9 @@ class Controller(object):
         # In order to avoid the jerk
 
         if throttle > 0 and vel_error > 0:
-            throttle = 0.75 * math.tanh(throttle * 0.6)
-            if throttle - self.last_throttle > 0.005:
-                throttle = self.last_throttle + 0.005
+            # throttle = 0.75 * math.tanh(throttle * 0.6)
+            # if throttle - self.last_throttle > 0.005:
+            #     throttle = self.last_throttle + 0.005
             brake = 0
         elif throttle < -1.1 and vel_error < 0:
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
