@@ -55,6 +55,10 @@ class Controller(object):
             self.last_time = rospy.get_time()
             return throttle, brake, steering
 
+        if abs(linear_vel) < 0.5:
+            linear_vel = 0.0
+            self.pid_control.reset()
+
         current_time = rospy.get_time()
         sample_time = current_time - self.last_time
         self.last_time = current_time
@@ -67,7 +71,7 @@ class Controller(object):
         # Here to set the velocity threshold so that, as the speed is too low, just stop
         # In order to avoid the jerk
 
-        if throttle >= 0.0:
+        if throttle >= 0.1:
             throttle = 0.75 * math.tanh(throttle * 0.6)
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
@@ -76,12 +80,15 @@ class Controller(object):
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
-            brake = 0
+            brake = 700
             throttle = 0
         self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
-        if brake < 100:
-            brake = 0.0
+        if brake < 700:
+            if throttle == 0 or current_vel < 1:
+                brake = 700
+            else:
+                brake = 0
         # decel = max(vel_error, self.decel_limit)
         # brake = decel * self.vehicle_mass * self.wheel_radius if decel > 0 else 0
 
