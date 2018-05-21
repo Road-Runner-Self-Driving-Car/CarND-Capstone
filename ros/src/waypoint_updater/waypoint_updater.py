@@ -116,7 +116,7 @@ class WaypointUpdater(object):
 
 
 
-        if traffic_wp == -1 or (traffic_wp > farthest_idx):
+        if traffic_wp == -1 or (traffic_wp >= farthest_idx):
             self.braking = False
             lane.waypoints = base_wpoints
         else:
