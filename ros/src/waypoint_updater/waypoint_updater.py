@@ -36,12 +36,11 @@ class WaypointUpdater(object):
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
-        rospy.Subscriber('/obstacle_waypoint', Int32, self.obstacle_waypoint_cb)
         rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
 
         self.current_velocity = 0.0
         self.decel = 1.0
-
+        self.obstacle_waypoint = None
         self.base_waypoints = None
         self.pose = None
         self.stopline_wp_idx = -1
@@ -180,9 +179,6 @@ class WaypointUpdater(object):
     def traffic_cb(self, msg):
         # DONE: Callback for /traffic_waypoint message. Implement
         self.stopline_wp_idx = msg.data
-
-    def obstacle_waypoint_cb(self, msg):
-        self.obstacle_waypoint = msg.data
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x
