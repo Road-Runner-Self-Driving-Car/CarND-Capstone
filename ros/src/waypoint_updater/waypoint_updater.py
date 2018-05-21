@@ -111,12 +111,10 @@ class WaypointUpdater(object):
         # if angle > math.pi / 4.0:
         #     closest_idx += 1
 
-        traffic_wp = self.stopline_wp_idx
+        # traffic_wp = self.stopline_wp_idx
 
 
-
-
-        if traffic_wp <= -1 or (traffic_wp >= farthest_idx):
+        if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             self.braking = False
             lane.waypoints = base_wpoints
         else:
@@ -124,6 +122,7 @@ class WaypointUpdater(object):
             # tl_dist = self.distance(self.base_waypoints.waypoints, closest_idx, traffic_wp)
             # min_stopping_dist = self.current_velocity ** 2 / (2.0 * MAX_DECELERATION) + STOP_DISTANCE
             lane.waypoints = self.deceleration_waypoints(base_wpoints, closest_idx)
+
 
         return lane
         # publish        
@@ -179,7 +178,7 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # DONE: Callback for /traffic_waypoint message. Implement
-        self.stopline_wp_idx = msg
+        self.stopline_wp_idx = msg.data
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x

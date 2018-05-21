@@ -49,9 +49,10 @@ class Controller(object):
         if not dbw_enabled:
             self.throttle_controller.reset()
             self.last_time = rospy.get_time()
-            return 0., 0., 0.
+            return throttle, brake, steering
 
         if self.last_time is None:
+            self.throttle_controller.reset()
             self.last_time = rospy.get_time()
             return throttle, brake, steering
 
@@ -75,17 +76,19 @@ class Controller(object):
             if throttle - self.last_throttle > 0.005:
                 throttle = self.last_throttle + 0.005
             brake = 0
-        elif throttle < -1.1 and vel_error < 0:
+        elif throttle < -0.1 and vel_error < 0:
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
             throttle = 0
         else:
+            brake = 0
+            throttle = 0
+
+        self.last_throttle = throttle
+        # brake = self.brake_lpf.filt(brake)
+
+        if linear_vel == 0 and current_vel < 0.5:
             brake = 400
             throttle = 0
-        self.last_throttle = throttle
-        brake = self.brake_lpf.filt(brake)
-
-        if linear_vel == 0 and current_vel < 1:
-            brake = 400
 
         if vel_error == 0 and throttle == 0:
             brake = 0.0
@@ -95,5 +98,4 @@ class Controller(object):
         steering = self.yaw_controller.get_steering(linear_vel, angular_vel,
                                                     current_vel)  # if vel_error == 0 and throttle == 0:
         # 	brake = 0.0
-        print(linear_vel)
         return throttle, brake, steering
