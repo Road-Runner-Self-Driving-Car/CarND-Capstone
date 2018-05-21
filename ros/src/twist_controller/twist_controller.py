@@ -15,10 +15,10 @@ class Controller(object):
 
         kp = 5.0
         ki = 0.05
-        kd = 0.01
+        kd = 0
         mn = decel_limit
         mx = accel_limit
-        self.throttle_controller = PID(kp, ki, kd, mn, mx)
+        self.throttle_controller = PID(kp, ki, kd)
         self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
         tau = 0.2
         ts = 0.1
@@ -66,10 +66,8 @@ class Controller(object):
 
         if throttle >= 0.0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
-            if throttle > self.accel_limit:
-                throttle = self.accel_limit
-            if throttle < self.decel_limit:
-                throttle = self.decel_limit
+            if throttle - self.last_throttle > 0.005:
+                throttle = self.last_throttle + 0.005
             brake = 0
         elif throttle < -1.1:
             brake = self.max_brake_const * math.tanh(-throttle * 0.3)
@@ -77,7 +75,7 @@ class Controller(object):
         else:
             brake = 0
             throttle = 0
-
+        self.last_throttle = throttle
         brake = self.brake_lpf.filt(brake)
         if brake < 100:
             brake = 0.0
