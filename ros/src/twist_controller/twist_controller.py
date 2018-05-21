@@ -72,8 +72,8 @@ class Controller(object):
 
         if throttle > 0 and vel_error > 0:
             throttle = 0.75 * math.tanh(throttle * 0.6)
-            if throttle - self.last_throttle > 0.005:
-                throttle = self.last_throttle + 0.005
+            # if throttle - self.last_throttle > 0.005:
+            #     throttle = self.last_throttle + 0.005
             brake = 0
         elif throttle < -0.1 and vel_error < 0:
             decel = max(vel_error, self.decel_limit)
