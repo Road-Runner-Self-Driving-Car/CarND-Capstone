@@ -57,7 +57,7 @@ class Controller(object):
 
         if abs(linear_vel) < 0.5:
             linear_vel = 0.0
-            self.pid_control.reset()
+            # self.throttle_controller.reset()
 
         current_time = rospy.get_time()
         sample_time = current_time - self.last_time
