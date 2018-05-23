@@ -18,8 +18,6 @@ STATE_COUNT_THRESHOLD = 3
 class TLDetector(object):
     def __init__(self):
         rospy.init_node('tl_detector')
-        print("TLDetector initialized")
-        print("Please turn on camera in the simulator")
 
         self.pose = None
         self.waypoints = None #Waypoint()
@@ -99,10 +97,9 @@ class TLDetector(object):
             #NOW we are only interested in RED light, later add yellow to prepare stop
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
-            self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
-            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-            self.state_count += 1 ########### different than walkthrough
+            self.state_count += 1 
+        self.upcoming_red_light_pub.publish(Int32(self.last_wp))
 
 
     def get_closest_waypoint(self, pos):
@@ -149,10 +146,10 @@ class TLDetector(object):
 
         """
         # For testing, just return the light state
-        return light.state
+        #return light.state
 
         # Use below code for real simulation
-        """
+        #"""
         if(not self.has_image):
             self.prev_light_loc = None
             return False
@@ -161,7 +158,7 @@ class TLDetector(object):
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
              
         return self.light_classifier.get_classification(cv_image)
-        """
+        #"""
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
