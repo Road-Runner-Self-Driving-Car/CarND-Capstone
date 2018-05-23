@@ -76,7 +76,12 @@ class Controller(object):
             #     throttle = self.last_throttle + 0.005
             brake = 0
         elif throttle < 0 and vel_error < 0:
-            decel = min(throttle, self.decel_limit)
+            # There throttle and decel_limit is negative, therefore, we use max instead of min to limit the decel within the boundary
+            # Ok, let's change a way to write the code:
+            if abs(throttle) <= abs(self.decel_limit):
+                decel = throttle
+            else:
+                decel = self.decel_limit
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius * 0.7
             # brake = brake * math.tanh(-throttle * 0.3)
             # brake = self.brake_lpf.filt(brake)
@@ -98,6 +103,7 @@ class Controller(object):
         # brake = decel * self.vehicle_mass * self.wheel_radius if decel > 0 else 0
 
         steering = self.yaw_controller.get_steering(linear_vel, angular_vel,
-                                                    current_vel, cur_angular, sample_time)  # if vel_error == 0 and throttle == 0:
+                                                    current_vel, cur_angular,
+                                                    sample_time)  # if vel_error == 0 and throttle == 0:
         # 	brake = 0.0
         return throttle, brake, steering
