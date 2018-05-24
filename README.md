@@ -8,6 +8,23 @@ John Kneen; Email is: cool.habanero@gmail.com
 
 ---------------------------------------------------------------------------------------------
 
+
+### DBW_Node and Twist Controller
+
+The process of the DBW_Node is: (1) read info from dbw_enabled, expected velocity and expected yaw, and the car's current velocity; (2) using PID controller to generate command (Throttle, Brake, and Steering) to match the expected velocity with the current velocity.
+
+As the PID controller is setup, in every cycle of the loop, the velocity error and the sample time are sent into the PID controller for getting the expected commend for the next step.
+
+The critical part in the dbw node is to process the output of PID controller. It is because the working mechanism for the speed-up and slow-down are different.
+
+If the output of the PID controller is positive, the throttle command is used to increase the speed of the car. In order to smooth the acceleration of the car's speed and reduce the jerk, a smooth function is applied.
+
+If the output of the PID contoller is negative, the brake command is used, by which parameter the weight of the car is included in the brake output.
+
+One special case is the slow speed region, as the car's speed slow, in order to stop the car completely, a brake value of 700 is needed.
+
+
+
 Please use **one** of the two installation options, either native **or** docker installation.
 
 ### Native Installation
