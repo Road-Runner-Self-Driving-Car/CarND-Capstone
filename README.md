@@ -63,7 +63,20 @@ After testing on different platform and on different simulations (highway and pa
 
 ---------------------------------------------------------------------------------------------
 
+### Waypoint Updater
 
+Two major functions of waypoint updater is to adjust the waypoint and plan the velocity of the car based on the traffic light information.
+
+It consists several parts:
+1. Loading the waypoint and traffic light status
+2. Compare the waypoints with car's current position to find the closest/starting point
+3. Planning on the waypoint and corresponding velocity based on the traffic light.
+4. Publish the planned waypoint and velocity to the dbw_node for the car driving control.
+
+
+
+
+---------------------------------------------------------------------------------------------
 Please use **one** of the two installation options, either native **or** docker installation.
 
 ### Native Installation
