@@ -94,7 +94,7 @@ class Controller(object):
         # brake = self.brake_lpf.filt(brake)
 
         if linear_vel == 0 and current_vel < 0.5:
-            brake = 100
+            brake = 700
             throttle = 0
 
         if vel_error == 0 and throttle == 0:

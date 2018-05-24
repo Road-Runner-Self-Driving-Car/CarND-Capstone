@@ -80,20 +80,25 @@ if __name__ == '__main__':
     try:
         from PIL import Image
         from cv_bridge import CvBridge
+        from glob import glob
+        import os
 
         tl_state = TLClassifier(model_path='frozen_inference_graph.pb')
         # tl_state=TLClassifier(model_path='eightbit_graph.pb')
-        image = Image.open('sample_images/left0000.jpg')
+        
+        for image_path in glob(os.path.join('sample_images', '*.jpg')):
+            print(image_path)
+            image = Image.open(image_path)
 
-        (im_width, im_height) = image.size
-        image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+            (im_width, im_height) = image.size
+            image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
 
-        bridge = CvBridge()
-        image_np = bridge.cv2_to_imgmsg(image_np, 'bgr8')
-        image_np = bridge.imgmsg_to_cv2(image_np, 'bgr8')
+            bridge = CvBridge()
+            image_np = bridge.cv2_to_imgmsg(image_np, 'bgr8')
+            image_np = bridge.imgmsg_to_cv2(image_np, 'bgr8')
 
-        print(tl_state.get_classification(image_np))
-        print("Above 0:RED, 1:YELLOW, 2:GREEN, 4:UNKNOWN")
+            print(tl_state.get_classification(image_np))
+            print("Above 0:RED, 1:YELLOW, 2:GREEN, 4:UNKNOWN \n")
 
     except rospy.ROSInterruptException:
         rospy.logerr('Could not start waypoint updater node.')
