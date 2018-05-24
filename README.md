@@ -13,15 +13,30 @@ John Kneen; Email is: cool.habanero@gmail.com
 
 The process of the DBW_Node is: (1) read info from dbw_enabled, expected velocity and expected yaw, and the car's current velocity; (2) using PID controller to generate command (Throttle, Brake, and Steering) to match the expected velocity with the current velocity.
 
+a. speed control:
+
 As the PID controller is setup, in every cycle of the loop, the velocity error and the sample time are sent into the PID controller for getting the expected commend for the next step.
+
+The final values for PID contorller are: P: 0.3, I: 0.0025, D: 0.5. It is based on the refresh rate of 50 Hz.
 
 The critical part in the dbw node is to process the output of PID controller. It is because the working mechanism for the speed-up and slow-down are different.
 
-If the output of the PID controller is positive, the throttle command is used to increase the speed of the car. In order to smooth the acceleration of the car's speed and reduce the jerk, a smooth function is applied.
+- If the output of the PID controller is positive, the throttle command is used to increase the speed of the car. In order to smooth the acceleration of the car's speed and reduce the jerk, a smooth function is applied.
 
-If the output of the PID contoller is negative, the brake command is used, by which parameter the weight of the car is included in the brake output.
+- If the output of the PID contoller is negative, the brake command is used, by which parameter the weight of the car is included in the brake output.
 
-One special case is the slow speed region, as the car's speed slow, in order to stop the car completely, a brake value of 700 is needed.
+- One special case is the slow speed region, as the car's speed slow, in order to stop the car completely, a brake value of 700 is needed.
+
+
+b. steering control:
+
+The steering control is based on the current velocity, expected velocity, and the expected angular_vel. One finding for the yaw_controller is, the quality of the control is highly depended on the delay of the simulation. On the different platform with different delay, the default yaw_controller's effectiveness is different. For the platform with huge delay, the additional pid controller with less P factor but more D factor could improve the control. But for the platform with moderate delay, the default yaw controller is good enough to drive the car within the lane.
+
+After testing on different platform and on different simulations (highway and parking lot), we eventually decided to keep the yaw controller using the default controller mechanism based on the following equation:
+
+ angular_velocity = current_velocity * angular_velocity / linear_velocity
+
+
 
 
 
