@@ -43,7 +43,7 @@ After testing on different platform and on different simulations (highway and pa
  angular_velocity = current_velocity * angular_velocity / linear_velocity
 
 
-
+---------------------------------------------------------------------------------------------
 
 
 Please use **one** of the two installation options, either native **or** docker installation.
