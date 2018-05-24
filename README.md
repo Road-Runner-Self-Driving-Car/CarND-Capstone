@@ -9,8 +9,26 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 
  Three team members were diveded to perception, planning, and control parts.
  
- faster_rcnn_inception_v2_coco was ued for transfer learning.
- Used tensorflow API to fine tune the model for traffic lights.
+ 
+---------------------------------------------------------------------------------------------
+### tl_detector and tl_classifier
+
+* The model chosen for transfer learning is faster_rcnn_inception_v2_coco.
+
+* Used tensorflow object detection API to fine tune the model for traffic lights.
+
+* Trained the model using tensorflow 1.7 with Cuda 9.0.
+
+* To freeze the model, used tensorflow 1.4 with Cuda 8.0.
+
+* Tested the code with tensorflow 1.3 with Cuda 8.0. 
+
+* With TF1.7+Cuda9.0, the measured inference time was around 45ms. With TF1.3+Cuda8.0, the measured inference time was around 60ms. 
+
+* The 60ms inference time is about 17Hz and this is faster than 10Hz ros camera data update frequency.
+
+* Due to lack of yellow light data set, the model often fails to detect yellow light but for this project, it wasn't necessary to use yellow light to control vehicle. Therefore, there was no further effort to train the model to recognize yellow light.
+ 
 
 ---------------------------------------------------------------------------------------------
 
