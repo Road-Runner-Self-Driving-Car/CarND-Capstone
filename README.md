@@ -9,7 +9,8 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 
  Three team members were diveded to perception, planning, and control parts.
  
- 
+ faster_rcnn_inception_v2_coco was ued for transfer learning.
+ Used tensorflow API to fine tune the model for traffic lights.
 
 ---------------------------------------------------------------------------------------------
 
