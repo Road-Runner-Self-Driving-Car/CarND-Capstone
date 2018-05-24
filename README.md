@@ -17,11 +17,11 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 
 * Used tensorflow object detection API to fine tune the model for traffic lights.
 
-* Trained the model using tensorflow 1.7 with Cuda 9.0.
+* Trained the model using tensorflow 1.7 and Cuda 9.0.
 
-* To freeze the model, used tensorflow 1.4 with Cuda 8.0.
+* To freeze the model, used tensorflow 1.4 and Cuda 8.0.
 
-* Tested the code with tensorflow 1.3 with Cuda 8.0. 
+* Tested the code with tensorflow 1.3 and Cuda 8.0. 
 
 * With TF1.7+Cuda9.0, the measured inference time was around 45ms. With TF1.3+Cuda8.0, the measured inference time was around 60ms. 
 
